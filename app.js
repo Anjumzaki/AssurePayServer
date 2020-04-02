@@ -238,7 +238,8 @@ app.post("/register", function(req, res) {
       let newUser = new User({
         userName: req.body.userName,
         email: req.body.email,
-        password: req.body.password
+        password: req.body.password,
+        pin:req.body.email
       });
       bcrypt.genSalt(10, function(err, salt) {
         bcrypt.hash(newUser.password, salt, function(err, hash) {
