@@ -20,7 +20,7 @@ const axios = require("axios");
 var app = express();
 var cors = require("cors");
 app.use(cors());
-//Body Parser middleware
+//Body Parser middleware 
 app.use(bodyParser.urlencoded({ extended: false }));
 // app.use(bodyParser.json());
 app.use(bodyParser.json({ limit: "1000kb" }));
@@ -399,6 +399,72 @@ app.post("/login", function(req, res) {
     })
     .catch(err => res.status(404).json(err));
 });
+
+
+// chnage pin
+app.put("/change/pin/:uName/:pass/:pin", function(req, res) {
+  console.log("login req", req.body);
+
+  User.findOne({ userName: req.params.uName })
+    .then(response => {
+      console.log("resp1", response);
+
+      var pass = response.password;
+      console.log("pass", pass);
+
+      bcrypt.compare(req.params.pass, response.password, function(
+        err,
+        isMatch
+      ) {
+        if (err) throw err;
+        if (isMatch) {
+          // res.send({
+          //   response: response,
+          //   resp: "match"
+          // });
+          User.updateOne(
+            { userName: req.params.uName },
+            {
+              $set: {
+                pin: req.params.pin
+              }
+            },
+            { upsert: true },
+            function(err, user) {
+              res.status(200).send({
+                success: "true",
+                message: "user pin updated"
+              });
+            }
+          );
+
+        } else {
+          res.send("Wrong email/password");
+        }
+      });
+    })
+    .catch(err => res.status(404).json(err));
+});
+
+// // Change pin
+// app.get("/change/pin/:uName/:pass/:pin", function(req, res) {
+//   console.log(req.body);
+//   User.updateOne(
+//     { userName: req.body.uName, password: req.params.pass },
+//     {
+//       $set: {
+//         pin: req.body.pin
+//       }
+//     },
+//     { upsert: true },
+//     function(err, user) {
+//       res.status(200).send({
+//         success: "true",
+//         message: "user updated"
+//       });
+//     }
+//   );
+// });
 
 //post msg
 app.post("/post/message", async (req, res) => {
